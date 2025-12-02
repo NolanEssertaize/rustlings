@@ -1,4 +1,5 @@
-fn factorial(num: u64) -> u64 {
+
+fn factorial(n: u64) -> u64 {
     // TODO: Complete this function to return the factorial of `num` which is
     // defined as `1 * 2 * 3 * … * num`.
     // https://en.wikipedia.org/wiki/Factorial
@@ -10,6 +11,12 @@ fn factorial(num: u64) -> u64 {
     // - additional variables
     // For an extra challenge, don't use:
     // - recursion
+    if n == 0 {
+        return 1;
+    }
+
+    // Recursive case: Calculate factorial using recursion
+    n * factorial(n - 1)
 }
 
 fn main() {
