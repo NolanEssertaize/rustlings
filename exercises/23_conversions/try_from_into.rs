@@ -4,7 +4,6 @@
 // type itself. You can read more about it in the documentation:
 // https://doc.rust-lang.org/std/convert/trait.TryFrom.html
 
-#![allow(clippy::useless_vec)]
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug, PartialEq)]
@@ -28,14 +27,23 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (r, g, b) = tuple;
+        Ok(Color {
+            red: u8::try_from(r).map_err(|_| IntoColorError::IntConversion)?,
+            green: u8::try_from(g).map_err(|_| IntoColorError::IntConversion)?,
+            blue: u8::try_from(b).map_err(|_| IntoColorError::IntConversion)?,
+        })
+    }
 }
 
 // TODO: Array implementation.
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        Color::try_from((arr[0], arr[1], arr[2]))
+    }
 }
 
 // TODO: Slice implementation.
@@ -43,7 +51,12 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        Color::try_from((slice[0], slice[1], slice[2]))
+    }
 }
 
 fn main() {
@@ -55,7 +68,7 @@ fn main() {
     let c2: Result<Color, _> = [183, 65, 14].try_into();
     println!("{c2:?}");
 
-    let v = vec![183, 65, 14];
+    let v = [183, 65, 14];
     // With slice we should use the `try_from` function
     let c3 = Color::try_from(&v[..]);
     println!("{c3:?}");
@@ -150,7 +163,7 @@ mod tests {
 
     #[test]
     fn test_slice_correct() {
-        let v = vec![183, 65, 14];
+        let v = [183, 65, 14];
         let c: Result<Color, _> = Color::try_from(&v[..]);
         assert!(c.is_ok());
         assert_eq!(
@@ -165,13 +178,13 @@ mod tests {
 
     #[test]
     fn test_slice_excess_length() {
-        let v = vec![0, 0, 0, 0];
+        let v = [0, 0, 0, 0];
         assert_eq!(Color::try_from(&v[..]), Err(BadLen));
     }
 
     #[test]
     fn test_slice_insufficient_length() {
-        let v = vec![0, 0];
+        let v = [0, 0];
         assert_eq!(Color::try_from(&v[..]), Err(BadLen));
     }
 }

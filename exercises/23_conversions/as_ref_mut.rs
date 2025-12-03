@@ -1,3 +1,6 @@
+use std::convert::AsRef;
+use std::convert::AsMut;
+
 // AsRef and AsMut allow for cheap reference-to-reference conversions. Read more
 // about them at https://doc.rust-lang.org/std/convert/trait.AsRef.html and
 // https://doc.rust-lang.org/std/convert/trait.AsMut.html, respectively.
@@ -5,20 +8,23 @@
 // Obtain the number of bytes (not characters) in the given argument
 // (`.len()` returns the number of bytes in a string).
 // TODO: Add the `AsRef` trait appropriately as a trait bound.
-fn byte_counter<T>(arg: T) -> usize {
+// Update: Added trait bound `AsRef<str>`
+// This allows the function to accept String, &str, or other types implementing AsRef<str>
+fn byte_counter<T: AsRef<str>>(arg: T) -> usize {
     arg.as_ref().len()
 }
 
-// Obtain the number of characters (not bytes) in the given argument.
-// TODO: Add the `AsRef` trait appropriately as a trait bound.
-fn char_counter<T>(arg: T) -> usize {
+// Update: Added trait bound `AsRef<str>`
+// Essential because `.chars()` is a method on the `str` slice
+fn char_counter<T: AsRef<str>>(arg: T) -> usize {
     arg.as_ref().chars().count()
 }
 
-// Squares a number using `as_mut()`.
-// TODO: Add the appropriate trait bound.
-fn num_sq<T>(arg: &mut T) {
-    // TODO: Implement the function body.
+// Update: Added trait bound `AsMut<u32>`
+// This restricts T to types that can provide a mutable reference to a u32 (like Box<u32>)
+fn num_sq<T: AsMut<u32>>(arg: &mut T) {
+    let num: &mut u32 = arg.as_mut();
+    *num = (*num) * (*num);
 }
 
 fn main() {
